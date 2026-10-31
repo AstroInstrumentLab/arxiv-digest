@@ -1,0 +1,10 @@
+# 强制 LF，避免 Windows 检出后 shell 脚本无法在 Linux 执行
+* text=auto eol=lf
+
+*.sh          text eol=lf
+*.service.in  text eol=lf
+*.timer.in    text eol=lf
+*.py          text eol=lf
+*.yaml        text eol=lf
+*.yml         text eol=lf
+*.md          text eol=lf

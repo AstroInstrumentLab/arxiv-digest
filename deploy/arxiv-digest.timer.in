@@ -1,0 +1,11 @@
+[Unit]
+Description=Daily arXiv literature digest at @@TIME@@
+
+[Timer]
+OnCalendar=*-*-* @@TIME@@:00 @@TZ@@
+Persistent=true
+AccuracySec=1min
+RandomizedDelaySec=60
+
+[Install]
+WantedBy=timers.target

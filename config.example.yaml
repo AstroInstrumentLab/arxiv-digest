@@ -1,0 +1,233 @@
+# ============================================================
+#  arXiv Digest 配置示例
+#  复制为 config.yaml 后按需修改： cp config.example.yaml config.yaml
+# ============================================================
+
+# ---- 调度（仅用于生成 systemd timer，改完需重装 timer）----
+schedule:
+  daily: "03:00"           # 每日运行时刻
+  timezone: "Asia/Shanghai"
+
+# ---- 抓取窗口 ----
+window:
+  min_hours: 120           # 每次至少回看多少小时（配合台账去重，可放心放大）
+  overlap_hours: 12        # 与上次运行的重叠，防公告延迟漏检
+  monday_hours: 72         # 周一额外回看（覆盖周末无公告）
+
+# ---- arXiv 召回 ----
+arxiv:
+  api: "https://export.arxiv.org/api/query"
+  categories:              # 想要哪些类目就写哪些
+    - astro-ph.HE
+    - astro-ph.IM
+    - astro-ph.GA
+    - astro-ph.SR
+  page_size: 100
+  max_pages: 12
+  request_interval: 3.0    # 秒；arXiv 建议 >=3
+  retries: 3
+  user_agent: "arxiv-digest/1.0 (your-email@example.com)"   # ← 改成你的邮箱，这是 arXiv 的礼貌要求
+
+# ---- 配额与阈值 ----
+quota:
+  main: 25                 # 主榜上限
+  instrument: 2            # 技术拾遗上限
+  background: 2            # 背景补充（理论类）上限
+
+threshold:
+  main: 26                 # 主榜入榜分（规则打分）
+  instrument: 30           # 技术拾遗入榜分
+
+# ---- 规则打分权重 ----
+weights:
+  source_per_hit: 15
+  source_cap: 45
+  astrometry_core_hit: 12
+  astrometry_generic_hit: 6
+  imaging_core_hit: 10
+  imaging_generic_hit: 5
+  method_cap: 30
+  facility_per_hit: 9
+  facility_priority_hit: 9
+  facility_cap: 15
+  cross_bonus: 10
+  title_bonus: 5
+  timeliness: 5
+  completeness: 5
+  theory_penalty: 10
+
+# ---- 关键词（最需要按自己的方向改的部分）----
+keywords:
+  # 主线研究主题：命中最多的就是最相关的
+  source:
+    - "long-period radio transient"
+    - "long period radio transient"
+    - "periodic radio transient"
+    - "long-period transient"
+    - "periodic radio source"
+    - "long-period pulsar"
+    - "ultra-long-period"
+    - "repeating fast radio burst"
+    - "repeating FRB|repeating FRBs"
+    - "radio transient"
+    - "slow transient"
+    - "tidal disruption event|TDE"
+    - "AGN jet"
+    - "radio flare"
+    - "radio outburst"
+
+  # 方法：核心词全权重、泛化词半权重
+  astrometry_core:
+    - "VLBI|very long baseline interferometry"
+    - "space VLBI|space-VLBI"
+    - "RadioAstron"
+    - "phase referencing|phase-referencing"
+    - "geodetic VLBI"
+  astrometry_generic:
+    - "astrometry|astrometric"
+    - "parallax"
+    - "proper motion"
+    - "reference frame"
+    - "core shift|core-shift"
+
+  imaging_core:
+    - "radio interferometry|radio interferometric"
+    - "very long baseline imaging|VLBI imaging"
+    - "self-calibration|self calibration"
+    - "wide-field imaging"
+    - "multi-frequency synthesis"
+    - "uv coverage|uv-plane"
+  imaging_generic:
+    - "interferometric imaging"
+    - "closure phase|closure amplitude"
+    - "image reconstruction"
+    - "deconvolution"
+    - "regularized maximum likelihood|RML"
+    - "polarization imaging"
+    - "imaging pipeline"
+
+  # 设备/阵列：大小写敏感，避免 FAST 命中 "fast radio burst"
+  facility:
+    - EVN
+    - VLBA
+    - CVN
+    - FAST
+    - SKA
+    - MeerKAT
+    - LOFAR
+    - ASKAP
+    - GMRT
+    - ngVLA
+    - ATCA
+    - VLA
+  facility_priority:      # 额外加权的设备
+    - CVN
+    - FAST
+    - EVN
+    - VLBA
+
+  # 射电望远镜技术（独立栏目）
+  instrument:
+    - "receiver"
+    - "feed horn|feedhorn"
+    - "phased array feed|PAF"
+    - "LNA|low-noise amplifier"
+    - "SIS mixer"
+    - "cryogenic"
+    - "digital backend"
+    - "correlator"
+    - "FPGA"
+    - "ADC"
+    - "sampler"
+    - "wideband|wide-band"
+    - "Mark6"
+    - "DBBC"
+    - "VLBI terminal"
+    - "hydrogen maser"
+    - "frequency standard"
+    - "RFI mitigation|RFI"
+    - "antenna design"
+    - "array calibration"
+    - "mutual coupling"
+    - "aperture array"
+    - "beamforming|beam forming"
+    - "impedance"
+    - "MMIC"
+    - "digitizer"
+  instrument_core:        # 命中其一即可加分
+    - "correlator"
+    - "DBBC"
+    - "phased array feed|PAF"
+    - "digital backend"
+    - "receiver"
+  instrument_context:     # 必须落在射电语境，否则整条丢弃
+    - "radio"
+    - "VLBI"
+    - "antenna"
+    - "interferometer"
+    - "GHz"
+    - "MHz"
+    - "millimeter|submillimeter|sub-mm"
+
+  # 理论/模拟类：命中 >=2 个 → 扣分并移入「背景补充」
+  theory:
+    - "numerical simulation|numerical simulations"
+    - "hydrodynamic simulation|hydrodynamical simulation"
+    - "magnetohydrodynamic|MHD simulation"
+    - "semi-analytic|semi-analytical"
+    - "analytic model|analytical model"
+    - "population synthesis"
+    - "theoretical model"
+    - "toy model"
+    - "Monte Carlo simulation"
+    - "cosmological simulation"
+    - "N-body simulation"
+
+  # 负向：无任何方法/设备命中时扣分
+  negative:
+    - "cosmological"
+    - "dark matter"
+    - "large-scale structure"
+    - "stellar evolution"
+    - "exoplanet"
+
+# ---- LLM（任意 OpenAI 兼容接口，按顺序降级）----
+llm:
+  probe_timeout: 4         # 启动时探测端点的超时（秒）
+  batch: 10                # 每批送多少篇摘要
+  temperature: 0.2
+  endpoints:
+    - name: primary
+      label: "你的中转站"       # 邮件页脚显示的名字
+      base_url: "https://api.example.com/v1"
+      models: ["gpt-4o-mini"]  # 按优先级排，不可用会自动跳到下一个
+      key_env: LLM_KEY_PRIMARY
+      dns_pin: null            # 仅当 DNS 解析到的 IP 不可达时使用，形如 "1.2.3.4"
+    - name: backup
+      label: "备用官方"
+      base_url: "https://api.deepseek.com/v1"
+      models: ["deepseek-chat"]
+      key_env: LLM_KEY_BACKUP
+      dns_pin: null
+
+# ---- 全文精读 ----
+deep_read:
+  enabled: true
+  trigger: tier_AB         # tier_A | tier_AB | all
+  max_papers: 7            # 每天最多精读几篇（主要成本控制点）
+  parallel: 3              # 并发数
+  sources: [arxiv_html, pdf]
+  max_chars: 35000
+  figures:
+    enabled: true          # 是否内嵌关键插图
+    max_bytes: 2000000
+
+# ---- 邮件 ----
+mail:
+  smtp: "smtp.qq.com"
+  port: 465
+  from: "your-email@example.com"
+  to: "your-email@example.com"      # 多个用逗号分隔
+  cc: ""
+  subject_prefix: "【文献日报】"
+  send_empty: true                  # 无新增时是否仍发一封"今日无新增"

@@ -1,0 +1,23 @@
+[Unit]
+Description=arXiv digest TEST run (replay, no ledger write)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=@@USER@@
+Group=@@USER@@
+WorkingDirectory=@@APP@@
+LoadCredentialEncrypted=arxiv-digest-env:/etc/arxiv-digest/credentials.env.cred
+Environment=VLBI_DIGEST_HOME=@@APP@@
+Environment=VLBI_DIGEST_PYTHON=@@PYTHON@@
+ExecStart=/bin/bash @@APP@@/bin/run_digest.sh --replay-hours 72
+
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=@@APP@@
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+UMask=0077
+TimeoutStartSec=45min

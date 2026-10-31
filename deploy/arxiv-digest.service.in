@@ -1,0 +1,41 @@
+[Unit]
+Description=arXiv literature digest (fetch -> LLM -> mail)
+After=network-online.target
+Wants=network-online.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=oneshot
+User=@@USER@@
+Group=@@USER@@
+WorkingDirectory=@@APP@@
+
+# 凭据由 root 加密，明文只存在于本服务的私有 tmpfs
+LoadCredentialEncrypted=arxiv-digest-env:/etc/arxiv-digest/credentials.env.cred
+
+Environment=VLBI_DIGEST_HOME=@@APP@@
+Environment=VLBI_DIGEST_PYTHON=@@PYTHON@@
+
+ExecStart=/bin/bash @@APP@@/bin/run_digest.sh
+
+# 沙箱
+NoNewPrivileges=yes
+PrivateTmp=yes
+PrivateDevices=yes
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=@@APP@@
+ProtectKernelTunables=yes
+ProtectKernelModules=yes
+ProtectControlGroups=yes
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+RestrictNamespaces=yes
+LockPersonality=yes
+MemoryDenyWriteExecute=yes
+SystemCallArchitectures=native
+UMask=0077
+
+TimeoutStartSec=45min
+# 失败（含发信失败）后自动重试
+Restart=on-failure
+RestartSec=300
