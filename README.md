@@ -5,6 +5,8 @@
 >
 > *A self-hosted daily arXiv digest: fetch → score → LLM summarize → full-text deep read → email.*
 
+维护：**Astro Instrument Lab**（中国科学院国家天文台） · [组织主页](https://github.com/AstroInstrumentLab)
+
 **适合谁**：研究方向窄、每天需要扫 arXiv，但不想被几百篇噪声淹没的研究者。
 默认配置面向 **射电天文 / VLBI 天体测量 / 长周期暂现源**，改关键词即可用于任何方向。
 
@@ -53,7 +55,7 @@ arXiv 全量
 ### 1. 获取代码
 
 ```bash
-git clone https://github.com/<your-name>/arxiv-digest.git
+git clone https://github.com/AstroInstrumentLab/arxiv-digest.git
 cd arxiv-digest
 python3 -m pip install --user requests pyyaml
 ```
